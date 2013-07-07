@@ -1,56 +1,13 @@
 (ns airplanes.core
-  (:gen-class))
-(use 'clojure.pprint)
-(use 'seesaw.core)
-;(use 'clj-time.periodic)
-;(use 'clj.time.core)
+  (:gen-class)
+  (:use clojure.pprint
+        [seesaw core color graphics behave keymap]
+        airplanes.futures
+        airplanes.field)
+  (:import [airplanes.field Coords]))
 
-(defn wait-futures
-  "Waits for a sequence of futures to complete."
-  [& futures]
-  (doseq [f futures]
-    @f))
-
-(defn dofutures
-  "Takes a number n and a function and spawns n future, each calling
-   the passed function. It waits for all the futures to get realized
-   and returns. Useful for testing concurent behaviors."
-  [n & funcs]
-  (let [futures (doall (for [_ (range n)
-                             func funcs]
-                         (future (func))))]
-    (apply wait-futures futures)))
-
-
-(def dim 10)
-(def speed 200)
-(defrecord Coords [x y])
+(def speed 2000)
 (defrecord Airplane [coords direction])
-(def airports [(Coords. 0 0) (Coords. 4 4) (Coords. 5 7)])
-
-(def field
-  (mapv (fn [_]
-          (mapv (fn [_] (ref {:state 0})); 0 - free 1 - busy 2 - airport
-                (range dim)))
-        (range dim)))
-
-(defn cell [position]
-  (-> field (nth (.x position)) (nth (.y position))))
-
-(defn out-of-field? [position]
-  (or (>= (.x position) dim)
-      (< (.x position) 0)
-      (>= (.y position) dim)
-      (< (.y position) 0)))
-
-(defn turn [direction]
-  (Coords. (- (.x direction)) (- (.y direction))))
-
-(defn airport-building []
-  (dosync
-    (doseq [place airports]
-      (alter (cell place) assoc :state 2))))
-
 
 (defn new-pos-and-dir [coords direction]
   (let [new-coords (Coords. (+ (.x coords) (.x direction))
@@ -58,18 +15,6 @@
     (if (out-of-field? new-coords)
       (Airplane. coords (turn direction))
       (Airplane. new-coords direction))))
-
-(defn check-state [cell state]
-  (= (@cell :state) state))
-
-(defn free? [place]
-  (check-state place 0))
-
-(defn busy? [place]
-  (check-state place 1))
-
-(defn airport? [place]
-  (check-state place 2))
 
 (defn check-state-airplane [airplane state]
   (= (.coords airplane) state))
@@ -129,26 +74,76 @@
   (doseq [airplane airplanes]
     (dofutures 1 #(fly-update airplane))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (native!)
+  (def f (frame :title "Airplanes"))
+  (def size-of-cell 15)
+
+  (defn get-color [n]
+    (condp = n
+      0 :green
+      1 :blue
+      2 :red))
+
+  ; (defn draw-rectangle [n m type]
+  ;   (draw g
+  ;         (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
+  ;         (style :background (get-color type))))
+
+  ; (defn draw-airport [n m]
+  ;   (draw-rectangle n m 2))
+
+  ; (defn draw-field [n m]
+  ;   (draw-rectangle n m 0))
+
+  ; (defn draw-airplane [n m]
+  ;   (let [airplane ]))
+
+  ; (defn render-cell [position]
+  ;   (let [x (.x position)
+  ;         y (.y position)
+  ;         type (@(cell (Coords. n m)) :state)]
+  ;     (condp = type
+  ;       0 :))
+
+  (defn draw-field [c g]
+    (doseq [n (range 0 dim)
+            m (range 0 dim)]
+     (draw g
+           (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
+           (style :background (get-color (@(cell (Coords. n m)) :state))))))
+
+  (defn make-panel []
+    (border-panel
+      :center (canvas :paint draw-field
+                      :background :black)))
+
+  (-> f pack! show!)
+
+
 (defn the-game [airplanes]
   (airport-building)
   (loop [length-of-level 1000 planes airplanes]
-    (when (and (> length-of-level 0) (not (check-for-crash planes)))
+    (when (check-for-crash planes)
+      (alert "Boooom! End of game :("))
+    (when (zero? length-of-level)
+      (alert "Level complete! :)"))
+    (when (and (pos? length-of-level) (not (check-for-crash planes)))
       (Thread/sleep speed)
       (fly-all planes)
       (doseq [n (range 0 dim)
               m (range 0 dim)
               :when (not= (@(cell (Coords. n m)) :state) 0)]
         (print n m @(cell (Coords. n m))))
+      (config! f :content (make-panel))
       (recur (- length-of-level 100) (remove-landed (add-airplane planes))))))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;(native!)
- ; (def f (frame :title "Airplanes"))
- ; (-> f pack! show!)
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   ;(println "Hello world"))
   (let [airplanes (vector (agent (Airplane. (Coords. 8 8) (Coords. 1 1))) (agent (Airplane. (Coords. 7 9) (Coords. 1 1))))]
-    (the-game airplanes)))
+    (the-game airplanes)
+    (shutdown-agents)))
