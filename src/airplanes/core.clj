@@ -2,6 +2,7 @@
   (:gen-class)
   (:use clojure.pprint
         [seesaw core color graphics behave keymap]
+        (seesaw [mouse :only (location)])
         airplanes.futures
         airplanes.field)
   (:import [airplanes.field Coords]))
@@ -64,7 +65,6 @@
 (defn add-airplane [airplanes]
   (let [rand-coords (Coords. (rand-int dim) (rand-int dim))
         rand-direction (Coords. (rand-int 2) (rand-int 2))]
-    (println "baba")
     (conj airplanes (new-plane rand-coords rand-direction))))
 
 (defn check-for-crash [airplanes]
@@ -79,6 +79,7 @@
 
   (native!)
   (def f (frame :title "Airplanes"))
+  ;(full-screen! f)
   (def size-of-cell 15)
 
   (defn get-color [n]
@@ -107,6 +108,18 @@
   ;         type (@(cell (Coords. n m)) :state)]
   ;     (condp = type
   ;       0 :))
+  (move! f :to [200 200])
+  (defn find-airplane-by-coords [coords airplanes]
+    (peek (filterv #(= coords (.coords @%)) airplanes)))
+
+  (defn change-direction [location airplanes]
+    (let [[x y] location
+          cell-x (quot x size-of-cell)
+          cell-y (quot y size-of-cell)
+          cell-coords (Coords. cell-x cell-y)]
+      (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
+        (send clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
+        (await clicked-airplane))))
 
   (defn draw-field [c g]
     (doseq [n (range 0 dim)
@@ -116,12 +129,12 @@
            (style :background (get-color (@(cell (Coords. n m)) :state))))))
 
   (defn make-panel []
-    (border-panel
-      :center (canvas :paint draw-field
-                      :background :black)))
+      (border-panel
+        :center (canvas :paint draw-field
+                        :background :black
+                        :bounds [60 60 (* dim 15) (* dim 15)])))
 
   (-> f pack! show!)
-
 
 (defn the-game [airplanes]
   (airport-building)
@@ -131,12 +144,17 @@
     (when (zero? length-of-level)
       (alert "Level complete! :)"))
     (when (and (pos? length-of-level) (not (check-for-crash planes)))
+      ;(listen f :mouse-clicked (fn [e] (println (nth (location) 0) (nth (location) 1))))
+     ; (listen f :mouse-clicked (fn [e] (println (quot (- (nth (location) 0) 207) size-of-cell) (quot (- (nth (location) 1) 229) size-of-cell))))
+      (listen f :mouse-clicked (fn [e] (println (airport? (cell (Coords. (quot (- (nth (location) 0) 207) size-of-cell)
+                                                                         (quot (- (nth (location) 1) 229) size-of-cell)))))))
+      ;(listen f :mouse-clicked (fn [e] (change-direction (location) airplanes)))
       (Thread/sleep speed)
       (fly-all planes)
-      (doseq [n (range 0 dim)
-              m (range 0 dim)
-              :when (not= (@(cell (Coords. n m)) :state) 0)]
-        (print n m @(cell (Coords. n m))))
+      ; (doseq [n (range 0 dim)
+      ;         m (range 0 dim)
+      ;         :when (not= (@(cell (Coords. n m)) :state) 0)]
+      ;   (print n m @(cell (Coords. n m))))
       (config! f :content (make-panel))
       (recur (- length-of-level 100) (remove-landed (add-airplane planes))))))
 
