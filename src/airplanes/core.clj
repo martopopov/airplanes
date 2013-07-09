@@ -114,8 +114,8 @@
 
   (defn change-direction [location airplanes]
     (let [[x y] location
-          cell-x (quot x size-of-cell)
-          cell-y (quot y size-of-cell)
+          cell-x (quot (- x 207) size-of-cell)
+          cell-y (quot (- y 229) size-of-cell)
           cell-coords (Coords. cell-x cell-y)]
       (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
         (send clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
@@ -146,9 +146,9 @@
     (when (and (pos? length-of-level) (not (check-for-crash planes)))
       ;(listen f :mouse-clicked (fn [e] (println (nth (location) 0) (nth (location) 1))))
      ; (listen f :mouse-clicked (fn [e] (println (quot (- (nth (location) 0) 207) size-of-cell) (quot (- (nth (location) 1) 229) size-of-cell))))
-      (listen f :mouse-clicked (fn [e] (println (airport? (cell (Coords. (quot (- (nth (location) 0) 207) size-of-cell)
-                                                                         (quot (- (nth (location) 1) 229) size-of-cell)))))))
-      ;(listen f :mouse-clicked (fn [e] (change-direction (location) airplanes)))
+      ;(listen f :mouse-clicked (fn [e] (println (airport? (cell (Coords. (quot (- (nth (location) 0) 207) size-of-cell)
+     ;                                                                    (quot (- (nth (location) 1) 229) size-of-cell)))))))
+      (listen f :mouse-clicked (fn [e] (change-direction (location) airplanes)))
       (Thread/sleep speed)
       (fly-all planes)
       ; (doseq [n (range 0 dim)
