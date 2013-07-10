@@ -47,7 +47,7 @@
           cell-y (quot (- y 229) size-of-cell)
           cell-coords (Coords. cell-x cell-y)]
       (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
-        (send clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
+        (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
         (await clicked-airplane))))
 
   (defn draw-field [c g]
@@ -68,17 +68,20 @@
   (native!)
 	(config! f :content (make-panel))
   (move! f :to [200 200])
-	(-> f pack! show!))
+  (show! f))
+	;(-> f pack! show!))
 
 (defn the-game [airplanes]
   (airport-building)
   (display)
   (loop [remaining-time length-of-level planes airplanes]
     (when (or (check-for-crash planes) (zero? remaining-time))
-      (alert "Boooom! End of game :("))
+      (alert "Boooom! Game over :("))
     (when (empty? planes)
       (alert "Level complete! :)"))
-    (when (and (pos? remaining-time) (not (empty? planes)) (not (check-for-crash planes)))
+    (when (and (pos? remaining-time)
+               (not (empty? planes))
+               (not (check-for-crash planes)))
       (listen f :mouse-clicked (fn [e] (change-direction (location) planes)))
       (Thread/sleep speed)
       (fly-all planes)

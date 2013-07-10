@@ -37,11 +37,11 @@
         new-pos (.coords (new-pos-and-dir coords direction))
         new-dir (.direction (new-pos-and-dir coords direction))
         new-pos-ref (cell new-pos)]
-          (cond
-            (free? new-pos-ref)    (do (send airplane #(assoc % :coords new-pos))
-                                       (send airplane #(assoc % :direction new-dir)))
-            (busy? new-pos-ref)    (send airplane #(assoc % :coords :crashed))
-            (airport? new-pos-ref) (send airplane #(assoc % :coords :landed)))))
+    (cond
+      (free? new-pos-ref)    (do (send-off airplane #(assoc % :coords new-pos))
+                                 (send-off airplane #(assoc % :direction new-dir)))
+      (busy? new-pos-ref)    (send-off airplane #(assoc % :coords :crashed))
+      (airport? new-pos-ref) (send-off airplane #(assoc % :coords :landed)))))
 
 (defn fly-update [plane]
   (when (flying? @plane)
