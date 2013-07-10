@@ -2,7 +2,7 @@
 
 (def dim 20)
 (defrecord Coords [x y])
-(def airports [(Coords. 0 0) (Coords. 4 4) (Coords. 5 7)])
+(def airports [(Coords. 0 0) (Coords. 8 2) (Coords. 6 10)])
 
 (def field
   (mapv (fn [_]
@@ -20,7 +20,8 @@
       (< (.y position) 0)))
 
 (defn turn [direction]
-  (Coords. (- (.x direction)) (- (.y direction))))
+  "Turns the direction by 90 degress counter-clock-wise"
+  (Coords. (.y direction) (- (.x direction))))
 
 (defn airport-building []
   (dosync
