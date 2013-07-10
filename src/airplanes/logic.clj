@@ -1,11 +1,10 @@
 (ns airplanes.logic
   (:gen-class)
   (:use airplanes.futures
-        airplanes.field)
-  (:import [airplanes.field Coords]))
-
-(def speed 1000)
-(defrecord Airplane [coords direction])
+        airplanes.field
+        airplanes.constants)
+  (:import [airplanes.constants Coords]
+           [airplanes.constants Airplane]))
 
 (defn new-pos-and-dir [coords direction]
   (let [new-coords (Coords. (+ (.x coords) (.x direction))
@@ -59,10 +58,19 @@
 (defn remove-landed [airplanes]
   (filterv (complement #(landed? (deref %))) airplanes))
 
-(defn add-airplane [airplanes]
-  (let [rand-coords (Coords. (rand-int dim) (rand-int dim))
-        rand-direction (Coords. (rand-int 2) (rand-int 2))]
-   ; (conj airplanes (new-plane rand-coords rand-direction))
+(defn add-airplane [airplanes remaining-time]
+  (if (and (zero? (mod remaining-time new-plane-time)) (> remaining-time stop-new-planes))
+    (let [possible-directions (for [i [-1 0 1]
+                                    j [-1 0 1]
+                                    :when (not= [i j] [0 0])]
+                                (Coords. i j))
+          possible-starts (for [i (range dim)
+                                j (range dim)
+                                :when (or (zero? (* i j)) (= (inc dim) i) (= (inc dim) j))]
+                            (Coords. i j))
+          rand-direction (nth possible-directions (rand-int 8))
+          rand-coords (nth possible-starts (rand-int (count possible-starts)))]
+      (conj airplanes (new-plane rand-coords rand-direction)))
     airplanes))
 
 (defn check-for-crash [airplanes]

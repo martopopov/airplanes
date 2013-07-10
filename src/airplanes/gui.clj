@@ -3,13 +3,13 @@
   (:use [seesaw core color graphics behave]
         (seesaw [mouse :only (location)])
         airplanes.field
-        airplanes.logic)
-  (:import [airplanes.field Coords]
-           [airplanes.logic Airplane]))
+        airplanes.logic
+        airplanes.constants)
+  (:import [airplanes.constants Coords]
+           [airplanes.constants Airplane]))
 
-  (native!)
+
   (def f (frame :title "Airplanes"))
-  (def size-of-cell 15)
 
   (defn get-color [n]
     (condp = n
@@ -38,7 +38,6 @@
   ;     (condp = type
   ;       0 :))
 
-  (move! f :to [200 200])
   (defn find-airplane-by-coords [coords airplanes]
     (peek (filterv #(= coords (.coords @%)) airplanes)))
 
@@ -64,23 +63,24 @@
                         :background :black
                         :bounds [60 60 (* dim 15) (* dim 15)])))
 
-(config! f :content (make-panel))
-(-> f show!)
+
+(defn display []
+  (native!)
+	(config! f :content (make-panel))
+  (move! f :to [200 200])
+	(-> f pack! show!))
 
 (defn the-game [airplanes]
   (airport-building)
-  (loop [length-of-level 10000 planes airplanes]
-    (when (or (check-for-crash planes) (zero? length-of-level))
+  (display)
+  (loop [remaining-time length-of-level planes airplanes]
+    (when (or (check-for-crash planes) (zero? remaining-time))
       (alert "Boooom! End of game :("))
     (when (empty? planes)
       (alert "Level complete! :)"))
-    (when (and (pos? length-of-level) (not (empty? planes)) (not (check-for-crash planes)))
-      ;(listen f :mouse-clicked (fn [e] (println (nth (location) 0) (nth (location) 1))))
-     ; (listen f :mouse-clicked (fn [e] (println (quot (- (nth (location) 0) 207) size-of-cell) (quot (- (nth (location) 1) 229) size-of-cell))))
-      ;(listen f :mouse-clicked (fn [e] (println (airport? (cell (Coords. (quot (- (nth (location) 0) 207) size-of-cell)
-     ;                                                                    (quot (- (nth (location) 1) 229) size-of-cell)))))))
-      (listen f :mouse-clicked (fn [e] (change-direction (location) airplanes)))
+    (when (and (pos? remaining-time) (not (empty? planes)) (not (check-for-crash planes)))
+      (listen f :mouse-clicked (fn [e] (change-direction (location) planes)))
       (Thread/sleep speed)
       (fly-all planes)
       (config! f :content (make-panel))
-      (recur (- length-of-level 100) (remove-landed (add-airplane planes))))))
+      (recur (dec remaining-time) (remove-landed (add-airplane planes remaining-time))))))

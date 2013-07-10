@@ -8,7 +8,7 @@
         "Tests out-of-field")
     (is (not (out-of-field? (Coords. (dec dim) 0)))
         "Tests in-field")
-    (is (= (Coords. -1 -1) (turn (Coords. 1 1)))
+    (is (= (Coords. -1 -1) (turn (Coords. 1 -1)))
         "Tests turning direction")
     (is (= 3
            (do

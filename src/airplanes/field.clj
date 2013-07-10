@@ -1,8 +1,6 @@
-(ns airplanes.field)
-
-(def dim 20)
-(defrecord Coords [x y])
-(def airports [(Coords. 0 0) (Coords. 8 2) (Coords. 6 10)])
+(ns airplanes.field
+  (:use airplanes.constants)
+  (:import [airplanes.constants Coords]))
 
 (def field
   (mapv (fn [_]
