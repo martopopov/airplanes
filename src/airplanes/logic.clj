@@ -28,7 +28,7 @@
 
 (defn new-plane [coords direction]
   (dosync
-    (alter (cell coords) assoc :state 1)
+    (alter (cell coords) assoc :state 1 :direction direction)
     (agent (Airplane. coords direction))))
 
 (defn fly [airplane]
@@ -46,13 +46,16 @@
 (defn fly-update [plane]
   (when (flying? @plane)
     (dosync
-      (alter (cell (.coords @plane)) #(update-in % [:state] (constantly 0))))
+      (let [old-cell (cell (.coords @plane))]
+        (alter old-cell #(update-in % [:state] (constantly 0)))
+        (alter old-cell #(dissoc % :direction))))
     (fly plane)
     (await plane)
     (if (flying? @plane)
       (let [new-cell (cell (.coords @plane))]
         (dosync
-          (alter new-cell #(update-in % [:state] (constantly 1))))))))
+          (alter new-cell #(update-in % [:state] (constantly 1)))
+          (alter new-cell #(assoc % :direction (.direction @plane))))))))
 
 
 (defn remove-landed [airplanes]
@@ -62,13 +65,13 @@
   (if (and (zero? (mod remaining-time new-plane-time)) (> remaining-time stop-new-planes))
     (let [possible-directions (for [i [-1 0 1]
                                     j [-1 0 1]
-                                    :when (not= [i j] [0 0])]
+                                    :when (and (not= [i j] [0 0]) (zero? (* i j)))]
                                 (Coords. i j))
           possible-starts (for [i (range dim)
                                 j (range dim)
                                 :when (or (zero? (* i j)) (= (inc dim) i) (= (inc dim) j))]
                             (Coords. i j))
-          rand-direction (nth possible-directions (rand-int 8))
+          rand-direction (nth possible-directions (rand-int 4))
           rand-coords (nth possible-starts (rand-int (count possible-starts)))]
       (conj airplanes (new-plane rand-coords rand-direction)))
     airplanes))
