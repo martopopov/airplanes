@@ -19,26 +19,27 @@
       1 :blue
       2 :red))
 
-  ; (defn draw-rectangle [n m type]
-  ;   (draw g
-  ;         (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
-  ;         (style :background (get-color type))))
+  (defn draw-triangle [n m direction]
+    (let [scaling (fn [p] (* size-of-cell p))
+          n-scaled (scaling n)
+          m-scaled (scaling m)
+          half-size (quot size-of-cell 2)]
+      (condp = direction
+        (Coords. 0 1) (polygon [n-scaled m-scaled]
+                               [(+ size-of-cell n-scaled) (+ m-scaled half-size)]
+                               [n-scaled (+ size-of-cell m-scaled)])
 
-  ; (defn draw-airport [n m]
-  ;   (draw-rectangle n m 2))
+        (Coords. 1 0) (polygon [n-scaled m-scaled]
+                               [(+ size-of-cell n-scaled) m-scaled]
+                               [(+ half-size n-scaled) (+ size-of-cell m-scaled)])
 
-  ; (defn draw-field [n m]
-  ;   (draw-rectangle n m 0))
+        (Coords. -1 0) (polygon [(+ size-of-cell n-scaled) (+ size-of-cell m-scaled)]
+                               [(+ size-of-cell n-scaled) m-scaled]
+                               [n-scaled (+ m-scaled half-size)])
 
-  ; (defn draw-airplane [n m]
-  ;   (let [airplane ]))
-
-  ; (defn render-cell [position]
-  ;   (let [x (.x position)
-  ;         y (.y position)
-  ;         type (@(cell (Coords. n m)) :state)]
-  ;     (condp = type
-  ;       0 :))
+        (Coords. 0 -1) (polygon [(+ size-of-cell n-scaled) (+ size-of-cell m-scaled)]
+                               [n-scaled (+ size-of-cell m-scaled)]
+                               [(+ n-scaled half-size) m-scaled]))))
 
   (defn find-airplane-by-coords [coords airplanes]
     (peek (filterv #(= coords (.coords @%)) airplanes)))
@@ -50,14 +51,22 @@
           cell-coords (Coords. cell-x cell-y)]
       (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
         (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
-        (await clicked-airplane))))
+        (await clicked-airplane)
+        (dosync
+          (alter (cell cell-coords) #(assoc % :direction (.direction @clicked-airplane)))))))
 
   (defn draw-field [c g]
     (doseq [n (range 0 dim)
             m (range 0 dim)]
-     (draw g
-           (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
-           (style :background (get-color (@(cell (Coords. n m)) :state))))))
+      (let [current-cell @(cell (Coords. n m))
+           current-state (current-cell :state)]
+        (if-let [current-direction (current-cell :direction)]
+          (draw g
+            (draw-triangle n m current-direction)
+            (style :foreground :blue :background :green :stroke 8))
+          (draw g
+            (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
+            (style :background (get-color current-state)))))))
 
   (defn make-panel []
       (border-panel
