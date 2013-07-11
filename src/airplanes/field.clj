@@ -11,6 +11,13 @@
 (defn cell [position]
   (-> field (nth (.x position)) (nth (.y position))))
 
+(defn restart-field []
+  (dosync
+    (doseq [i (range dim)
+            j (range dim)]
+      (alter (cell (Coords. i j)) assoc :state 0))))
+
+
 (defn out-of-field? [position]
   (or (>= (.x position) dim)
       (< (.x position) 0)

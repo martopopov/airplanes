@@ -1,7 +1,8 @@
 (ns airplanes.field-test
   (:use clojure.test
-        airplanes.field)
-  (:import [airplanes.field Coords]))
+        airplanes.field
+        airplanes.constants)
+  (:import [airplanes.constants Coords]))
 
 (deftest test-field
     (is (out-of-field? (Coords. dim 0))
@@ -16,4 +17,9 @@
              (apply + (map #(count (filter airport? %)) field))))
         "Tests building the airports")
     (is (airport? (cell (nth airports 1)))
-        "Tests check-state?"))
+        "Tests check-state?")
+    (is (do
+          (airport-building)
+          (restart-field)
+          (not (airport? (cell (nth airports 1)))))
+        "checking restarting field"))
