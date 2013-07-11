@@ -9,7 +9,9 @@
            [airplanes.constants Airplane]))
 
 
-  (def f (frame :title "Airplanes"))
+  (def f (frame :title "Airplanes"
+                :height (+ 38 (* dim 15))
+                :width (+ 16 (* dim 15))))
 
   (defn get-color [n]
     (condp = n
@@ -43,8 +45,8 @@
 
   (defn change-direction [location airplanes]
     (let [[x y] location
-          cell-x (quot (- x 207) size-of-cell)
-          cell-y (quot (- y 229) size-of-cell)
+          cell-x (quot (- x 208) size-of-cell)
+          cell-y (quot (- y 230) size-of-cell)
           cell-coords (Coords. cell-x cell-y)]
       (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
         (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
