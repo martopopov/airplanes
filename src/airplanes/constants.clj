@@ -10,5 +10,5 @@
 (def size-of-cell 15)
 (def stop-new-planes (quot length-of-level 5))
 (defrecord Airplane [coords direction])
-(def starting-planes (vector (agent (Airplane. (Coords. 8 8) (Coords. 1 1)))
-                             (agent (Airplane. (Coords. 3 9) (Coords. 1 1)))))
+(def starting-planes (vector (agent (Airplane. (Coords. 8 8) (Coords. 1 0)))
+                             (agent (Airplane. (Coords. 3 9) (Coords. -1 0)))))
