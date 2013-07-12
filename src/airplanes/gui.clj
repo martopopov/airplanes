@@ -52,10 +52,12 @@
         cell-y (quot (- y 230) size-of-cell)
         cell-coords (Coords. cell-x cell-y)]
     (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
-      (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
+      (send-off clicked-airplane
+                #(assoc % :direction (turn (.direction @clicked-airplane))))
       (await clicked-airplane)
       (dosync
-        (alter (cell cell-coords) #(assoc % :direction (.direction @clicked-airplane)))))))
+        (alter (cell cell-coords)
+               #(assoc % :direction (.direction @clicked-airplane)))))))
 
 (defn draw-field [c g]
   (doseq [n (range 0 dim)
@@ -74,8 +76,7 @@
     (border-panel
       :center (canvas :paint draw-field
                       :background :green
-                      :bounds [60 60 (* dim 15) (* dim 15)])))
-
+                      :bounds [60 60 (* dim size-of-cell) (* dim size-of-cell)])))
 
 (defn display []
   (native!)
@@ -83,7 +84,8 @@
   (move! f :to [200 200])
   (show! f))
 
-(listen f :mouse-clicked (fn [e] (change-direction (location) starting-planes)))
+(listen f :mouse-clicked
+        (fn [e] (change-direction (location) starting-planes)))
 
 (defn the-game [airplanes]
   (airport-building)
