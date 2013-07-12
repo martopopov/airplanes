@@ -4,7 +4,7 @@
         airplanes.logic
         airplanes.constants)
   (:import [airplanes.constants Coords]
-          [airplanes.constants Airplane]))
+           [airplanes.constants Airplane]))
 
 (def airplanes-for-test (vector (agent (Airplane. (Coords. 2 2) (Coords. 1 0)))
                                 (agent (Airplane. :landed (Coords. 1 0)))
@@ -33,16 +33,16 @@
         y-coords (.y (.coords airplane))]
     (is (not= direction
               (Coords. 0 0))
-      "they don't stay static")
+        "they don't stay static")
     (is (or (= x-coords (inc dim))
             (= x-coords 0)
             (= y-coords (inc dim))
             (= y-coords 0))
-      "they are on the boundaries"))
+        "they are on the boundaries"))
   (let [airplane (peek airplanes-for-test)]
     (fly-update airplane)
     (is (and (= (Airplane. (Coords. 6 3) (Coords. 1 -1))
                 @airplane)
              (busy? (cell (Coords. 6 3)))
              (free? (cell (Coords. 5 4))))
-      "they update")))
+        "they update")))
