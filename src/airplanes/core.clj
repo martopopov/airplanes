@@ -8,5 +8,5 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (the-game starting-planes)
+  (the-game #'starting-planes)
   (shutdown-agents))

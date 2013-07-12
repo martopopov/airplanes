@@ -91,15 +91,21 @@
   (airport-building)
   (display)
   (loop [remaining-time length-of-level planes airplanes]
-    (when (or (check-for-crash planes) (zero? remaining-time))
+    (when (or (check-for-crash @planes) (zero? remaining-time))
       (alert "Boooom! Game over :("))
-    (when (empty? planes)
+    (when (empty? @planes)
       (alert "Level complete! :)"))
     (when (and (pos? remaining-time)
-               (not (empty? planes))
-               (not (check-for-crash planes)))
+               (not (empty? @planes))
+               (not (check-for-crash @planes)))
       ; (listen f :mouse-clicked (fn [e] (change-direction (location) planes)))
       (Thread/sleep speed)
-      (fly-all planes)
+      (fly-all @planes)
       (config! f :content (make-panel))
-      (recur (dec remaining-time) (remove-landed (add-airplane planes remaining-time))))))
+      (recur (dec remaining-time)
+             (do
+               (alter-var-root #'starting-planes
+                               #(add-airplane % remaining-time))
+               (alter-var-root #'starting-planes
+                               remove-landed)
+               #'starting-planes)))))
