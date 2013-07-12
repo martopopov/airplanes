@@ -14,8 +14,8 @@
   (is (= (Airplane. (Coords. 6 4) (Coords. 1 -1))
          (new-pos-and-dir (Coords. 5 5) (Coords. 1 -1)))
       "they move :)")
-  (is (= (Airplane. (Coords. 5 (inc dim)) (Coords. -1 1))
-         (new-pos-and-dir (Coords. 5 (inc dim)) (Coords. -1 -1)))
+  (is (= (Airplane. (Coords. 5 (inc dim)) (Coords. -1 0))
+         (new-pos-and-dir (Coords. 5 (inc dim)) (Coords. 0 1)))
       "they change their directions")
   (is (crashed? (Airplane. :crashed (Coords. 1 -1)))
       "crashed indeed")
@@ -46,4 +46,3 @@
              (busy? (cell (Coords. 6 3)))
              (free? (cell (Coords. 5 4))))
       "they update")))
-

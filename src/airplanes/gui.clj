@@ -21,25 +21,27 @@
 
   (defn draw-triangle [n m direction]
     (let [scaling (fn [p] (* size-of-cell p))
-          n-scaled (scaling n)
-          m-scaled (scaling m)
+          n-scaled (+ (scaling n) 1)
+          m-scaled (+ (scaling m) 1)
+          nplus-scaled (- (+ size-of-cell n-scaled) 1)
+          mplus-scaled (- (+ size-of-cell m-scaled) 1)
           half-size (quot size-of-cell 2)]
       (condp = direction
         (Coords. 0 1) (polygon [n-scaled m-scaled]
-                               [(+ size-of-cell n-scaled) (+ m-scaled half-size)]
-                               [n-scaled (+ size-of-cell m-scaled)])
+                               [(+ n-scaled half-size) mplus-scaled]
+                               [nplus-scaled m-scaled])
 
         (Coords. 1 0) (polygon [n-scaled m-scaled]
-                               [(+ size-of-cell n-scaled) m-scaled]
-                               [(+ half-size n-scaled) (+ size-of-cell m-scaled)])
+                               [n-scaled mplus-scaled]
+                               [nplus-scaled (+ half-size m-scaled)])
 
-        (Coords. -1 0) (polygon [(+ size-of-cell n-scaled) (+ size-of-cell m-scaled)]
-                               [(+ size-of-cell n-scaled) m-scaled]
-                               [n-scaled (+ m-scaled half-size)])
+        (Coords. -1 0) (polygon [nplus-scaled mplus-scaled]
+                                [nplus-scaled m-scaled]
+                                [n-scaled (+ m-scaled half-size)])
 
-        (Coords. 0 -1) (polygon [(+ size-of-cell n-scaled) (+ size-of-cell m-scaled)]
-                               [n-scaled (+ size-of-cell m-scaled)]
-                               [(+ n-scaled half-size) m-scaled]))))
+        (Coords. 0 -1) (polygon [nplus-scaled mplus-scaled]
+                                [n-scaled mplus-scaled]
+                                [(+ n-scaled half-size) m-scaled]))))
 
   (defn find-airplane-by-coords [coords airplanes]
     (peek (filterv #(= coords (.coords @%)) airplanes)))
@@ -63,7 +65,7 @@
         (if-let [current-direction (current-cell :direction)]
           (draw g
             (draw-triangle n m current-direction)
-            (style :foreground :blue :background :green :stroke 8))
+            (style :foreground :blue :background :green))
           (draw g
             (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
             (style :background (get-color current-state)))))))
@@ -71,16 +73,16 @@
   (defn make-panel []
       (border-panel
         :center (canvas :paint draw-field
-                        :background :black
+                        :background :green
                         :bounds [60 60 (* dim 15) (* dim 15)])))
 
 
 (defn display []
   (native!)
-	(config! f :content (make-panel))
+  (config! f :content (make-panel))
   (move! f :to [200 200])
   (show! f))
-	;(-> f pack! show!))
+  ;(-> f pack! show!))
 
 (defn the-game [airplanes]
   (airport-building)

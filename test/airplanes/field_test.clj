@@ -9,8 +9,11 @@
         "Tests out-of-field")
     (is (not (out-of-field? (Coords. (dec dim) 0)))
         "Tests in-field")
-    (is (= (Coords. -1 -1) (turn (Coords. 1 -1)))
-        "Tests turning direction")
+    (are [x y] (= x y)
+         (Coords. 1 0) (turn (Coords. 0 -1))
+         (Coords. 0 1) (turn (Coords. 1 0))
+         (Coords. 0 -1)  (turn (Coords. -1 0))
+         (Coords. -1 0)  (turn (Coords. 0 1)))
     (is (= 3
            (do
              (airport-building)
