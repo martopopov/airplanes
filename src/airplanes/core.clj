@@ -8,5 +8,5 @@
 (defn -main
   "a simple airplane game"
   [& args]
-  (the-game #'starting-planes)
+  (the-game)
   (shutdown-agents))

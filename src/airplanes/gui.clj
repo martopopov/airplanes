@@ -87,10 +87,10 @@
 (listen f :mouse-clicked
         (fn [e] (change-direction (location) starting-planes)))
 
-(defn the-game [airplanes]
+(defn the-game []
   (airport-building)
   (display)
-  (loop [remaining-time length-of-level planes airplanes]
+  (loop [remaining-time length-of-level planes #'starting-planes]
     (when (or (check-for-crash @planes) (zero? remaining-time))
       (alert "Boooom! Game over :("))
     (when (empty? @planes)
