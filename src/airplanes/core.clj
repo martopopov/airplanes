@@ -6,7 +6,7 @@
            [airplanes.constants Airplane]))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "a simple airplane game"
   [& args]
   (the-game #'starting-planes)
   (shutdown-agents))

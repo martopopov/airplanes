@@ -1,5 +1,4 @@
 (ns airplanes.logic
-  (:gen-class)
   (:use airplanes.futures
         airplanes.field
         airplanes.constants)
@@ -57,7 +56,6 @@
           (alter new-cell #(update-in % [:state] (constantly 1)))
           (alter new-cell #(assoc % :direction (.direction @plane))))))))
 
-
 (defn remove-landed [airplanes]
   (filterv (complement #(landed? (deref %))) airplanes))
 
@@ -69,7 +67,9 @@
                                 (Coords. i j))
           possible-starts (for [i (range dim)
                                 j (range dim)
-                                :when (or (zero? (* i j)) (= (inc dim) i) (= (inc dim) j))]
+                                :when (or (and (zero? (* i j)) (not (zero? (+ i j))))
+                                          (= (inc dim) i)
+                                          (= (inc dim) j))]
                             (Coords. i j))
           rand-direction (nth possible-directions (rand-int 4))
           rand-coords (nth possible-starts (rand-int (count possible-starts)))]
