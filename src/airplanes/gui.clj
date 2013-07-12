@@ -52,12 +52,6 @@
         cell-y (quot (- y 230) size-of-cell)
         cell-coords (Coords. cell-x cell-y)]
     (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
-      (send-off clicked-airplane
-                #(assoc % :direction (turn (.direction @clicked-airplane))))
-      (await clicked-airplane)
-      (dosync
-        (alter (cell cell-coords)
-               #(assoc % :direction (.direction @clicked-airplane)))))))
       (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
       (await clicked-airplane)
       (dosync
@@ -82,11 +76,6 @@
                       :background :green
                       :bounds [60 60 (* dim 15) (* dim 15)])))
 
-(defn make-panel []
-    (border-panel
-      :center (canvas :paint draw-field
-                      :background :green
-                      :bounds [60 60 (* dim 15) (* dim 15)])))
 
 (defn display []
   (native!)
