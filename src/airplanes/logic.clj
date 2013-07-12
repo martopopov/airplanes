@@ -60,7 +60,8 @@
   (filterv (complement #(landed? (deref %))) airplanes))
 
 (defn add-airplane [airplanes remaining-time]
-  (if (and (zero? (mod remaining-time new-plane-time)) (> remaining-time stop-new-planes))
+  (if (and (zero? (mod remaining-time new-plane-time))
+           (> remaining-time stop-new-planes))
     (let [possible-directions (for [i [-1 0 1]
                                     j [-1 0 1]
                                     :when (and (not= [i j] [0 0]) (zero? (* i j)))]
