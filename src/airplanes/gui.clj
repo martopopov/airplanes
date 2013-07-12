@@ -8,8 +8,8 @@
            [airplanes.constants Airplane]))
 
 (def f (frame :title "Airplanes"
-              :height (+ 38 (* dim 15))
-              :width (+ 16 (* dim 15))
+              :height (+ 38 (* dim size-of-cell))
+              :width (+ 16 (* dim size-of-cell))
               :on-close :exit
               :resizable? false))
 
