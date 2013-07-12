@@ -26,7 +26,7 @@
 
 (defn turn [direction]
   "Turns the direction by 90 degress counter-clock-wise"
-  (Coords. (.y direction) (- (.x direction))))
+  (Coords. (- (.y direction)) (.x direction)))
 
 (defn airport-building []
   (dosync
