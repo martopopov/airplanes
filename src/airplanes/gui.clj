@@ -54,6 +54,7 @@
       (when-let [clicked-airplane (find-airplane-by-coords cell-coords airplanes)]
         (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
         (await clicked-airplane)
+        (println "baba")
         (dosync
           (alter (cell cell-coords) #(assoc % :direction (.direction @clicked-airplane)))))))
 
@@ -84,6 +85,8 @@
   (show! f))
   ;(-> f pack! show!))
 
+  (listen f :mouse-clicked (fn [e] (change-direction (location) starting-planes)))
+
 (defn the-game [airplanes]
   (airport-building)
   (display)
@@ -95,7 +98,7 @@
     (when (and (pos? remaining-time)
                (not (empty? planes))
                (not (check-for-crash planes)))
-      (listen f :mouse-clicked (fn [e] (change-direction (location) planes)))
+      ; (listen f :mouse-clicked (fn [e] (change-direction (location) planes)))
       (Thread/sleep speed)
       (fly-all planes)
       (config! f :content (make-panel))
