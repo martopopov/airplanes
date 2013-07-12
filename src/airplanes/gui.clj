@@ -58,6 +58,10 @@
       (dosync
         (alter (cell cell-coords)
                #(assoc % :direction (.direction @clicked-airplane)))))))
+      (send-off clicked-airplane #(assoc % :direction (turn (.direction @clicked-airplane))))
+      (await clicked-airplane)
+      (dosync
+        (alter (cell cell-coords) #(assoc % :direction (.direction @clicked-airplane)))))))
 
 (defn draw-field [c g]
   (doseq [n (range 0 dim)
@@ -71,6 +75,12 @@
         (draw g
           (rect (* size-of-cell n) (* size-of-cell m) size-of-cell size-of-cell)
           (style :background (get-color current-state)))))))
+
+(defn make-panel []
+    (border-panel
+      :center (canvas :paint draw-field
+                      :background :green
+                      :bounds [60 60 (* dim 15) (* dim 15)])))
 
 (defn make-panel []
     (border-panel
