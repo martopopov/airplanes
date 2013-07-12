@@ -59,7 +59,10 @@
 
 
 (defn remove-landed [airplanes]
-  (filterv (complement #(landed? (deref %))) airplanes))
+  (alter-var-root
+    #'starting-planes
+    (fn [planes]
+      (filterv (complement #(landed? (deref %))) planes))))
 
 (defn add-airplane [airplanes remaining-time]
   (if (and (zero? (mod remaining-time new-plane-time)) (> remaining-time stop-new-planes))
@@ -73,7 +76,10 @@
                             (Coords. i j))
           rand-direction (nth possible-directions (rand-int 4))
           rand-coords (nth possible-starts (rand-int (count possible-starts)))]
-      (conj airplanes (new-plane rand-coords rand-direction)))
+      (alter-var-root
+        #'starting-planes
+        #(conj % (new-plane rand-coords rand-direction)))
+      airplanes)
     airplanes))
 
 (defn check-for-crash [airplanes]
